@@ -3,7 +3,7 @@ import time
 from PIL import ImageGrab
 
 def menu():
-    print("What task would you like to perform:")
+    print("What task would you like to perform?:")
     print("[0] Troubleshoot")
     print("[1] Swipe Card")
     print("[2] Download/Upload")
@@ -16,6 +16,7 @@ def menu():
     print("[9] Inspect Sample")
     print("[10] Stabilize Steering")
     print("[11] Submit Scan")
+    
     option = int(input('options:'))
 
     if(option == 0):
@@ -23,35 +24,45 @@ def menu():
     elif(option == 1):
         start_task()
         swipe_card()
+        menu()
     elif(option == 2):
         start_task()
         download_upload()
+        menu()
     elif(option == 3):
         start_task()
         fuel_engines()
+        menu()
     elif(option == 4):
         start_task()
         divert_power()
+        menu()
     elif(option == 5):
         start_task()
         empty_chute()
+        menu()
     elif(option == 6):
         start_task()
         accept_power()
     elif(option == 7):
         start_task()
         fix_wires()
+        menu()
     elif(option == 8):
         start_task()
         prime_shields()
+        menu()
     elif(option == 9):
         start_task()
         inspect_sample()
+        menu()
     elif(option == 10):
         start_task()
         stabilize_steering()
+        menu()
     elif(option == 11):
         start_task()
+        menu()
     else:
         print("Invalid option, please try again!")
         menu()
@@ -71,31 +82,26 @@ def swipe_card():
     time.sleep(1)
     pyautogui.moveTo(540, 400)
     pyautogui.drag(900, 0, 0.8, button='left')
-    menu()
 
 def download_upload():
     pyautogui.moveTo(970, 650)
     pyautogui.click()
-    menu()
 
 def accept_power():
     pyautogui.moveTo(956, 539)
     pyautogui.click()
-    menu()
 
 def fuel_engines():
     pyautogui.moveTo(1470, 880)
     pyautogui.mouseDown()
     time.sleep(5)
     pyautogui.mouseUp()
-    menu()
 
 def divert_power():
     sliders = [(620, 780), (715, 780), (813, 780), (912, 780), (1007, 780), (1101, 780), (1201, 780), (1297, 780)]
     for i in sliders:
         pyautogui.moveTo(i)
         pyautogui.drag(0, -100, 0.5, button='left')
-    menu()
 
 def empty_chute():
     pyautogui.moveTo(1270,420)
@@ -103,7 +109,6 @@ def empty_chute():
     pyautogui.moveTo(1270,720)
     time.sleep(3)
     pyautogui.mouseUp()
-    menu()
 
 def fix_wires():
     wires = [(560, 270), (560, 460), (560, 650), (560, 830), (1330, 270), (1330, 460), (1330, 650), (1330, 830)]
@@ -144,6 +149,3 @@ def inspect_sample():
 def stabilize_steering():
     pyautogui.moveTo(960, 537)
     pyautogui.click()
-
-
-menu()

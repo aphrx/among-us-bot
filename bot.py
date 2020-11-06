@@ -2,7 +2,10 @@ import time
 from PIL import ImageGrab
 import numpy as np
 import cv2
-import pyautogui 
+import pyautogui
+import pytesseract
+import navigate
+from pytesseract import Output
 
 class Bot:
     def __init__(self):
@@ -15,16 +18,23 @@ class Bot:
         self.height = int(1080 * self.scale_percent / 100)
         self.dim = (self.width, self.height)
         self.buffer(2)
-        self.getVideo()
+        self.read_map()
+        #self.getVideo()
 
-    def mapROI(self, img):
-        mask = np.zeros_like(img)
-        admin = [(567, 281), (669, 281), (669, 355), (650,375), (567, 375)]
-        cafeteria = [(437, 22), (566, 22), (630, 81), (630 ,199), (575, 255), (450, 255), (396, 201), (396, 64)]
-        cv2.fillPoly(mask, [np.array(admin)], 255)
-        cv2.fillPoly(mask, [np.array(cafeteria)], 255)
-        masked = cv2.bitwise_and(img, mask)
-        return masked
+    def read_map(self):
+        task_locations = [
+            #(807, 511), # Medbay: Sample
+            (1290, 691) # Admin: Swipe Card
+        ]
+        task = (235, 221, 4)
+        pyautogui.press("tab")
+        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+        pix = img.load()
+        
+        for tasks in task_locations:
+            if pix[tasks] == task:
+               navigate.admin_swipe_card()
+
 
     def getVideo(self):
         pyautogui.press("tab")
@@ -42,24 +52,6 @@ class Bot:
             self.playerLocation(frame_r_hsv)
             
         cv2.destroyAllWindows()
-
-    def playerLocation(self, img):
-        # define range of blue color in HSV
-        img = self.mapROI(img)
-        # define range of red color in HSV
-        lower_red = np.array([0, 10, 120])
-        upper_red = np.array([15, 255, 255])
-
-        mask = cv2.inRange (img, lower_red, upper_red)
-        contours, _ = cv2.findContours(mask.copy(), 1, 1)
-        print(contours)
-        if len(contours) > 0:
-            red_area = max(contours, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(red_area)
-            cv2.rectangle(img,(x, y),(x+w, y+h),(0, 0, 255), 2)
-        cv2.imshow("test", img)
-        cv2.waitKey(1)
-        
 
         
     def timedKeyPress(self, dur):
