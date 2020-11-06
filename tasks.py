@@ -15,6 +15,7 @@ def menu():
     print("[8] Prime Shields")
     print("[9] Inspect Sample")
     print("[10] Stabilize Steering")
+    print("[11] Submit Scan")
     option = int(input('options:'))
 
     if(option == 0):
@@ -49,6 +50,8 @@ def menu():
     elif(option == 10):
         start_task()
         stabilize_steering()
+    elif(option == 11):
+        start_task()
     else:
         print("Invalid option, please try again!")
         menu()
@@ -130,7 +133,7 @@ def inspect_sample():
     red = (246, 134, 134)
     pyautogui.moveTo(1260, 930)
     pyautogui.click()
-    time.sleep(60)
+    time.sleep(70)
     img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
     pix = img.load()
     for tube in tubes:
