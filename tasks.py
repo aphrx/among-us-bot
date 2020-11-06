@@ -1,6 +1,7 @@
 import pyautogui
 import time
 from PIL import ImageGrab
+import numpy as np
 
 def menu():
     print("What task would you like to perform?:")
@@ -16,6 +17,9 @@ def menu():
     print("[9] Inspect Sample")
     print("[10] Stabilize Steering")
     print("[11] Submit Scan")
+    print("[12] Align Engine Output")
+    print("[13] Clear Asteroids")
+    print("[14] Clean O2 Filter")
     
     option = int(input('options:'))
 
@@ -62,6 +66,18 @@ def menu():
         menu()
     elif(option == 11):
         start_task()
+        menu()
+    elif(option == 12):
+        start_task()
+        align_engine_output()
+        menu()
+    elif(option == 13):
+        start_task()
+        clear_asteroids()
+        menu()
+    elif(option == 14):
+        start_task()
+        clean_O2_filter()
         menu()
     else:
         print("Invalid option, please try again!")
@@ -132,6 +148,7 @@ def prime_shields():
         if pix[tile] == red:
             pyautogui.moveTo(tile)
             pyautogui.click()
+            
 
 def inspect_sample():
     tubes = [(732, 590), (850, 590), (960, 590), (1075, 590), (1190, 590)]
@@ -146,6 +163,38 @@ def inspect_sample():
             pyautogui.moveTo(tube[0], 850)
             pyautogui.click()
 
+def align_engine_output():
+    img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+    im = np.array(img)
+    marker = (202, 202, 216)
+    Y,X = np.where(np.all(im==marker, axis=2))
+    pyautogui.moveTo(X[0], Y[0])
+    pyautogui.mouseDown()
+    pyautogui.moveTo(1250, 540)
+    pyautogui.mouseUp()
+
+def clear_asteroids(): # Horrible Accuracy
+    while True:
+        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+        array = np.array(img)
+        asteroid = (24, 56, 41)
+        Y,X = np.where(np.all(array==asteroid, axis=2))
+        if len(X) != 0:
+            pyautogui.moveTo(X[0], Y[0])
+            pyautogui.click()
+            time.sleep(0.5)
+
+def clean_O2_filter():
+    while True:
+        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+        array = np.array(img)
+        leaf = (198, 150, 66)
+        Y,X = np.where(np.all(array==leaf, axis=2))
+        if len(X) != 0:
+            pyautogui.moveTo(X[0], Y[0])
+            pyautogui.dragTo(668, 555, 0.5, button='left')
+
 def stabilize_steering():
     pyautogui.moveTo(960, 537)
     pyautogui.click()
+    

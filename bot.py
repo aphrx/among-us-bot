@@ -5,12 +5,28 @@ import cv2
 import pyautogui
 import pytesseract
 import navigate
+import tasks
 from pytesseract import Output
 
 class Bot:
     def __init__(self):
         self.name = "Aphrx"
         self.tasks = None
+
+    def menu(self):
+        print("What would you like to do?")
+        print("[1] Run Bot")
+        print("[2] Solve Tasks")
+        print("[3] Navigate to Tasks")
+
+        option = int(input('options:'))
+
+        if(option == 1):
+            self.startup()
+        if(option == 2):
+            tasks.menu()
+        if(option == 3):
+            navigate.map()
 
     def startup(self):
         self.scale_percent = 60 # percent of original size
@@ -34,7 +50,6 @@ class Bot:
         for tasks in task_locations:
             if pix[tasks] == task:
                navigate.admin_swipe_card()
-
 
     def getVideo(self):
         pyautogui.press("tab")
@@ -88,4 +103,4 @@ class Bot:
         
     
 bot = Bot()
-bot.startup()
+bot.menu()
