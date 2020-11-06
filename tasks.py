@@ -12,6 +12,9 @@ def menu():
     print("[5] Empty Chutes")
     print("[6] Accept Power")
     print("[7] Fix Wires")
+    print("[8] Prime Shields")
+    print("[9] Inspect Sample")
+    print("[10] Stabilize Steering")
     option = int(input('options:'))
 
     if(option == 0):
@@ -37,11 +40,19 @@ def menu():
     elif(option == 7):
         start_task()
         fix_wires()
+    elif(option == 8):
+        start_task()
+        prime_shields()
+    elif(option == 9):
+        start_task()
+        inspect_sample()
+    elif(option == 10):
+        start_task()
+        stabilize_steering()
     else:
         print("Invalid option, please try again!")
         menu()
     
-
 def troubleshoot():
     while True:
         print(pyautogui.position())
@@ -87,7 +98,7 @@ def empty_chute():
     pyautogui.moveTo(1270,420)
     pyautogui.mouseDown()
     pyautogui.moveTo(1270,720)
-    time.sleep(5)
+    time.sleep(3)
     pyautogui.mouseUp()
     menu()
 
@@ -104,10 +115,32 @@ def fix_wires():
                 pyautogui.moveTo(wires[j])
                 pyautogui.mouseUp()
 
-#start_task()
-#empty_chute()
-#troubleshoot()
-#divert_power()
-#download()
-#fuel_engines()
+def prime_shields():
+    tiles = [(970, 370), (1080, 450), (1090, 640), (967, 547), (999, 699), (815, 617), (820, 458)]
+    red = (202, 94, 112)
+    img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+    pix = img.load()
+    for tile in tiles:
+        if pix[tile] == red:
+            pyautogui.moveTo(tile)
+            pyautogui.click()
+
+def inspect_sample():
+    tubes = [(732, 590), (850, 590), (960, 590), (1075, 590), (1190, 590)]
+    red = (246, 134, 134)
+    pyautogui.moveTo(1260, 930)
+    pyautogui.click()
+    time.sleep(60)
+    img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+    pix = img.load()
+    for tube in tubes:
+        if pix[tube] == red:
+            pyautogui.moveTo(tube[0], 850)
+            pyautogui.click()
+
+def stabilize_steering():
+    pyautogui.moveTo(960, 537)
+    pyautogui.click()
+
+
 menu()
