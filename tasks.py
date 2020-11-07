@@ -1,7 +1,9 @@
 import pyautogui
 import time
-from PIL import ImageGrab
 import numpy as np
+import cv2
+from PIL import ImageGrab
+import pytesseract
 
 def menu():
     print("What task would you like to perform?:")
@@ -20,6 +22,10 @@ def menu():
     print("[12] Align Engine Output")
     print("[13] Clear Asteroids")
     print("[14] Clean O2 Filter")
+    print("[15] Calibrate Distributor")
+    print("[16] Start Reactor")
+    print("[17] Chart Course")
+    print("[18] Unlock Manifold")
     
     option = int(input('options:'))
 
@@ -78,6 +84,22 @@ def menu():
     elif(option == 14):
         start_task()
         clean_O2_filter()
+        menu()
+    elif(option == 15):
+        start_task()
+        calibrate_distributor()
+        menu()
+    elif(option == 16):
+        start_task()
+        start_reactor()
+        menu()
+    elif(option == 17):
+        start_task()
+        chart_course()
+        menu()
+    elif(option == 18):
+        start_task()
+        unlock_manifold()
         menu()
     else:
         print("Invalid option, please try again!")
@@ -194,7 +216,65 @@ def clean_O2_filter():
             pyautogui.moveTo(X[0], Y[0])
             pyautogui.dragTo(668, 555, 0.5, button='left')
 
+def calibrate_distributor():
+    distributor = [(800, 300), (800, 550), (800, 830)]
+    buttons = [(1230, 310), (1230, 580), (1230, 840)]
+    on = (71, 73, 71)
+    for i in range(3):
+        pyautogui.moveTo(buttons[i])
+        while True:
+            img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+            pix = img.load()
+            print(pix[distributor[i]])
+            if pix[distributor[i]] == on:
+                pyautogui.click()
+                break
+
+def start_reactor(): 
+    lights = [(500, 450), (650, 450), (790, 450), (500, 600), (650, 600), (790, 600), (500, 750), (650, 750), (790, 750)]
+    buttons = [(1140, 450), (1260, 450), (1400, 450), (1140, 600), (1260, 600), (1400, 600), (1140, 750), (1260, 750), (1400, 750), ]
+    
+    on = (68, 168, 255)
+    for i in range(0, 5):
+        flashed = []
+        while True:
+            img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+            pix = img.load()
+            for j in range(9):
+                if(pix[lights[j]] == on):
+                    flashed.append(j)
+                    time.sleep(0.3)
+
+            if len(flashed) == (i + 1):
+                break
+            
+        time.sleep(1)
+        print(flashed)
+        for k in flashed:
+            pyautogui.moveTo(buttons[k])
+            pyautogui.click()
+            time.sleep(0.2)        
+
 def stabilize_steering():
     pyautogui.moveTo(960, 537)
     pyautogui.click()
-    
+
+def chart_course():
+    while True:
+        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+        array = np.array(img)
+        rocket = (37, 111, 159)
+        nodes = (36, 111, 159)
+        Y,X = np.where(np.all(array==rocket, axis=2))
+        Yn,Xn = np.where(np.all(array==nodes, axis=2))
+        if len(X) != 0 and len(Xn) != 0:
+            pyautogui.moveTo(X[0], Y[0])
+            pyautogui.dragTo(Xn[0], Yn[0], 0.1, button='left')
+
+def unlock_manifold():
+    img = ImageGrab.grab(bbox=(582,393,1335,683))
+    img = np.array(img)
+    img = img[:, :, ::-1].copy()
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("Grayscale.png", gray)    
+    print(pytesseract.image_to_string(cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)))
