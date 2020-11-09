@@ -2,7 +2,7 @@ import pyautogui
 import time
 import numpy as np
 import cv2
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import pytesseract
 
 def menu():
@@ -137,9 +137,13 @@ def fuel_engines():
 
 def divert_power():
     sliders = [(620, 780), (715, 780), (813, 780), (912, 780), (1007, 780), (1101, 780), (1201, 780), (1297, 780)]
+    img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+    pix = img.load()
     for i in sliders:
-        pyautogui.moveTo(i)
-        pyautogui.drag(0, -100, 0.5, button='left')
+        if pix[i][0] > 50:
+            pyautogui.moveTo(i)
+            pyautogui.drag(0, -100, 0.5, button='left')
+            break
 
 def empty_chute():
     pyautogui.moveTo(1270,420)
@@ -163,10 +167,11 @@ def fix_wires():
 
 def prime_shields():
     tiles = [(970, 370), (1080, 450), (1090, 640), (967, 547), (999, 699), (815, 617), (820, 458)]
-    red = (202, 94, 112)
+    red = (202, 102, 120)
     img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
     pix = img.load()
     for tile in tiles:
+        print(pix[tile])
         if pix[tile] == red:
             pyautogui.moveTo(tile)
             pyautogui.click()
@@ -197,14 +202,13 @@ def align_engine_output():
 
 def clear_asteroids(): # Horrible Accuracy
     while True:
-        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
+        img = ImageGrab.grab(bbox=(553,135,1361,941))
         array = np.array(img)
         asteroid = (24, 56, 41)
         Y,X = np.where(np.all(array==asteroid, axis=2))
         if len(X) != 0:
-            pyautogui.moveTo(X[0], Y[0])
+            pyautogui.moveTo(X[0]+553, Y[0]+135)
             pyautogui.click()
-            time.sleep(0.5)
 
 def clean_O2_filter():
     while True:
@@ -272,9 +276,23 @@ def chart_course():
             pyautogui.dragTo(Xn[0], Yn[0], 0.1, button='left')
 
 def unlock_manifold():
-    img = ImageGrab.grab(bbox=(582,393,1335,683))
-    img = np.array(img)
+    merged = Image.new("RGB", (1150, 115))
+    number_box_start = [(585,395), (737, 395), (890, 395), (1040, 395), (1195, 395), (585,548), (737, 548), (890, 548), (1040, 548), (1195, 548)]
+    
+    for i in range(10):
+        img = ImageGrab.grab(bbox=(number_box_start[i][0]+10,number_box_start[i][1]+10,number_box_start[i][0]+125,number_box_start[i][1]+125))
+        #img = np.array(img)
+        #img = img[:, :, ::-1].copy()
+        #img[:,:,0] = np.zeros([img.shape[0], img.shape[1]])
+        #cv2.imwrite("numbers/n"+ str(i) +".png", img)
+        merged.paste(img, (int(i * 115),0))
+        
+    img = np.array(merged)
     img = img[:, :, ::-1].copy()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite("Grayscale.png", gray)    
-    print(pytesseract.image_to_string(cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)))
+    img[:,:,0] = np.zeros([img.shape[0], img.shape[1]])
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_gray[img_gray < 255-90] += 90  
+
+    cv2.imwrite("merged.png", img_gray)
+
+    print("Output: " + pytesseract.image_to_string(img_gray, config="-c tessedit_char_whitelist=0123456789"))
