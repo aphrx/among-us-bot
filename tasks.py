@@ -98,7 +98,7 @@ def menu():
         chart_course()
         menu()
     elif(option == 18):
-        start_task()
+        #start_task()
         unlock_manifold()
         menu()
     else:
@@ -275,24 +275,58 @@ def chart_course():
             pyautogui.moveTo(X[0], Y[0])
             pyautogui.dragTo(Xn[0], Yn[0], 0.1, button='left')
 
-def unlock_manifold():
+def unlock_manifold_get_numbers():
+    start_task()
     merged = Image.new("RGB", (1150, 115))
     number_box_start = [(585,395), (737, 395), (890, 395), (1040, 395), (1195, 395), (585,548), (737, 548), (890, 548), (1040, 548), (1195, 548)]
     
     for i in range(10):
         img = ImageGrab.grab(bbox=(number_box_start[i][0]+10,number_box_start[i][1]+10,number_box_start[i][0]+125,number_box_start[i][1]+125))
-        #img = np.array(img)
-        #img = img[:, :, ::-1].copy()
-        #img[:,:,0] = np.zeros([img.shape[0], img.shape[1]])
-        #cv2.imwrite("numbers/n"+ str(i) +".png", img)
         merged.paste(img, (int(i * 115),0))
         
     img = np.array(merged)
     img = img[:, :, ::-1].copy()
     img[:,:,0] = np.zeros([img.shape[0], img.shape[1]])
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_gray[img_gray < 255-90] += 90  
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
-    cv2.imwrite("merged.png", img_gray)
+    # Connect text with a horizontal shaped kernel
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10,3))
+    dilate = cv2.dilate(thresh, kernel, iterations=3)
 
-    print("Output: " + pytesseract.image_to_string(img_gray, config="-c tessedit_char_whitelist=0123456789"))
+    # Remove non-text contours using aspect ratio filtering
+    cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    for c in cnts:
+        x,y,w,h = cv2.boundingRect(c)
+        aspect = w/h
+        if aspect < 3:
+            cv2.drawContours(thresh, [c], -1, (0,0,0), -1)
+
+    # Invert image and OCR
+    result = 255 - thresh
+    cv2.imwrite("merged.png", result)
+    data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=0123456789N')
+    return data.strip()
+
+def unlock_manifold():
+    data = unlock_manifold_get_numbers()
+    whitelist = "123456789N"
+    print(data)
+    print(len(data))
+    if(len(data) == 10):
+        print("Correct len")
+    else:
+        start_task()
+        unlock_manifold()
+    for i in data:
+        for j in whitelist:
+            print (i + " and " + j + " are " + str(i==j))
+            if i == j:
+                whitelist = whitelist.replace(j, "")
+    print("whitelist: " + whitelist + "len: " + str(len(whitelist)))
+    if (whitelist == ""):
+        print("success")
+    else:
+        start_task()
+        unlock_manifold() 
