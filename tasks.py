@@ -305,8 +305,8 @@ def unlock_manifold_get_numbers():
 
     # Invert image and OCR
     result = 255 - thresh
-    cv2.imwrite("merged.png", result)
-    data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=0123456789N')
+    cv2.imwrite("manifold_debug.png", result)
+    data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=123456789N')
     return data.strip()
 
 def unlock_manifold():
