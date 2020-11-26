@@ -57,11 +57,6 @@ class Bot:
             img = ImageGrab.grab(bbox=(0,0 ,1920,1080)) #bbox specifies specific region (bbox= x,y,width,height)
             img_np = np.array(img)
             frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
-            frame_r = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)
-            #if self.tasks is None: 
-            #    self.tasks, output = self.determineTasks(frame_r)
-            #else:
-            #    print(self.tasks)
             frame_hsv = cv2.cvtColor(img_np, cv2.COLOR_BGR2HSV)
             frame_r_hsv = cv2.resize(frame_hsv, (0,0), fx=0.5, fy=0.5)
             self.playerLocation(frame_r_hsv)

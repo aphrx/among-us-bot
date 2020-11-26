@@ -167,6 +167,8 @@ def fix_wires():
 
 def prime_shields():
     tiles = [(970, 370), (1080, 450), (1090, 640), (967, 547), (999, 699), (815, 617), (820, 458)]
+    #    tiles = [(405, 233), (500,273), (411, 292), (482, 383), (390, 434), (316, 270), (306, 381)]
+
     red = (202, 102, 120)
     img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
     pix = img.load()
@@ -202,12 +204,12 @@ def align_engine_output():
 
 def clear_asteroids(): # Horrible Accuracy
     while True:
-        img = ImageGrab.grab(bbox=(553,135,1361,941))
+        img = ImageGrab.grab(bbox=(1024,135,1361,941))
         array = np.array(img)
         asteroid = (24, 56, 41)
         Y,X = np.where(np.all(array==asteroid, axis=2))
         if len(X) != 0:
-            pyautogui.moveTo(X[0]+553, Y[0]+135)
+            pyautogui.moveTo(X[0]+1024, Y[0]+135)
             pyautogui.click()
 
 def clean_O2_filter():
@@ -264,16 +266,29 @@ def stabilize_steering():
     pyautogui.click()
 
 def chart_course():
-    while True:
-        img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
-        array = np.array(img)
-        rocket = (37, 111, 159)
-        nodes = (36, 111, 159)
-        Y,X = np.where(np.all(array==rocket, axis=2))
-        Yn,Xn = np.where(np.all(array==nodes, axis=2))
-        if len(X) != 0 and len(Xn) != 0:
-            pyautogui.moveTo(X[0], Y[0])
-            pyautogui.dragTo(Xn[0], Yn[0], 0.1, button='left')
+    img = ImageGrab.grab(bbox=(465,265,1455,815))
+    array = np.array(img)
+
+    # special color
+    colors = [ (37, 111, 160), (36, 112, 161), (135, 161, 176), (100, 60, 0), (255, 255, 255) ]
+    nodes = [565, 760, 960, 1160, 1350]
+
+    pix = img.load()
+    Y,X = np.where(np.all(array==colors[0], axis=2))
+    for node in nodes:
+        x_avg = 0
+        y_avg = 0
+        counter = 0
+        for i in range(len(X)):
+            if ((X[i] > (node-40)-465) and (X[i] < (node+40)-465)):
+                print(str(X[i]) + ", " + str(Y[i]))
+                x_avg += X[i]
+                y_avg += Y[i]
+                counter += 1
+        if(counter != 0):
+            pyautogui.moveTo(x_avg/counter+500, y_avg/counter+265)
+            pyautogui.mouseDown()
+            
 
 def unlock_manifold_get_numbers():
     start_task()
@@ -305,6 +320,7 @@ def unlock_manifold_get_numbers():
 
     # Invert image and OCR
     result = 255 - thresh
+    result = cv2.GaussianBlur(result,(5,5),cv2.BORDER_DEFAULT)
     cv2.imwrite("merged.png", result)
     data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=0123456789N')
     return data.strip()
@@ -313,20 +329,27 @@ def unlock_manifold():
     data = unlock_manifold_get_numbers()
     whitelist = "123456789N"
     print(data)
-    print(len(data))
-    if(len(data) == 10):
-        print("Correct len")
-    else:
+    if(len(data) != 10):
         start_task()
         unlock_manifold()
     for i in data:
         for j in whitelist:
-            print (i + " and " + j + " are " + str(i==j))
             if i == j:
                 whitelist = whitelist.replace(j, "")
-    print("whitelist: " + whitelist + "len: " + str(len(whitelist)))
     if (whitelist == ""):
-        print("success")
+        input_numbers(data)
     else:
         start_task()
         unlock_manifold() 
+
+def input_numbers(data):
+    numbers = [(660, 450), (820, 450), (960, 450), (1120, 450), (1260, 450), (660, 620), (820, 620), (960, 620), (1120, 620), (1260, 620)]
+    order = list(data)
+    print("INPUTTING NUMBERS")
+    for i in range(1, 11):
+        for j in range(10):
+            if order[j] == str(i) or (order[j] == "N" and i == 10):
+                print(order[j] + " matched with " + str(i))
+                pyautogui.moveTo(numbers[j])
+                pyautogui.click()
+    time.sleep(10)
