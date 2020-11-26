@@ -322,7 +322,7 @@ def unlock_manifold_get_numbers():
     result = 255 - thresh
     result = cv2.GaussianBlur(result,(5,5),cv2.BORDER_DEFAULT)
     cv2.imwrite("merged.png", result)
-    data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=0123456789N')
+    data = pytesseract.image_to_string(result, lang='eng',config='--psm 6 -c tessedit_char_whitelist=123456789N')
     return data.strip()
 
 def unlock_manifold():
