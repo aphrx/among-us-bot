@@ -1,68 +1,140 @@
 import pyautogui
 import time
 import tasks
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import cv2
 import numpy as np
 
+marker = (198, 17, 17)
+
 def map():
     print("Where would you like to go?:")
-    print("[0] Troubleshoot")
-    print("[1] Admin: Swipe Card")
+    print("[1] Custom Map")
+    print("[2] Pathfinding")
 
     option = int(input('options:'))
 
-    if(option == 0):
-        troubleshoot()
     if(option == 1):
-        admin_swipe_card()
+        custom_map()
+    if(option == 2):
+        pathfinding()
 
-def troubleshoot():
-    #while True:
-    img = ImageGrab.grab(bbox=(0,0,1920,1080))
-    pix = img.load()
-    img = np.array(img)
-    
-    print(pix[1068, 216])
+def custom_map():
+    tasks = [
+        ["Admin", (1288, 688)], 
+        ["Inspect Sample", (807, 511)],
+        ["Divert Power", (692, 587)],
+        ["Download [Electrical]", (658, 585)]
+        ]
+    trail = []
+    while True:
+        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+        img = np.array(imgGrab)
+        img[467:655, 836:984] = [0, 0, 0]
+        img[504:553, 1055:1216] = [0, 0, 0]
+        img[560:600, 628:837] = [0, 0, 0]
+        pix = imgGrab.load()
 
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        result = np.zeros((540, 960, 3), dtype = "uint8")
+        marker_arrived = (228, 132, 10)
+        Y,X = np.where(np.all(img==marker_arrived, axis=2))
+
+        for t in trail:
+            y = int(t[1])
+            x = int(t[0])
+            result[y-1:y+1, x-1:x+1] = [255, 255, 255]
+
+        if len(X) == 0:
+            Y,X = np.where(np.all(img==marker, axis=2))
+        if len(X) != 0:
+            img[Y[0]-1:Y[0]+1, X[0]-1:X[0]+1] = [198, 17, 17]
+            y = int(Y[0]/2)
+            x = int(X[0]/2)
+            trail.append([x, y])
+            result[y-1:y+1, x-1:x+1] = [198, 17, 17]
         
-    #lower_range = np.array([10,40,220])
-    #upper_range = np.array([190,200,250])
 
-    lower_range = np.array([100,10,10])
-    upper_range = np.array([200,20,20])
-    
-    mask = cv2.inRange(img, lower_range, upper_range)
-    output = cv2.bitwise_and(img, img, mask = mask)
-
-    
-    cv2.imshow('img', cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    cv2.imshow('mask', mask)
-    
-    cv2.waitKey(0)
+        for task in tasks:
+            if pix[task[1]][0] > 200:
+                y = int(task[1][1]/2)
+                x = int(task[1][0]/2)
+                result[y-3:y+3, x-3:x+3] = [245, 226, 4]
+  
+        cv2.imwrite("result.png", cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+        cv2.imshow('Result', cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+        cv2.waitKey(1)
     cv2.destroyAllWindows()
+
+def pathfinding():
+    img_map_pix = Image.open('result_test.jpg')
+    img_map_og = np.array(img_map_pix)
+
+    nodes = (0, 254, 0)
+    while True:
+        img_map_pix = Image.open('result_test.jpg')
+        img_map = np.array(img_map_pix)
+        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+        img = np.array(imgGrab)
+        img[467:655, 836:984] = [0, 0, 0]
+        img[504:553, 1055:1216] = [0, 0, 0]
+        img[560:600, 628:837] = [0, 0, 0]
         
+        pix_map = img_map_pix.load()
+        Y,X = np.where(np.all(img==marker, axis=2))
+        x = 0
+        y = 0
+        for i in range(len(X)):
+            x = int(X[i]/2)
+            y = int(Y[i]/2)
+            if pix_map[x, y] == (255, 255, 255):
+                img_map[y, x] = [198, 17, 17]
+                img_map[y-1:y+1, x-1:x+1] = [198, 17, 17]
+                break
+        find_path(x, y, pix_map)
 
-def timedKeyPress(dur, key):
-    end = time.time() + dur
-    while(time.time() < end):
-        pyautogui.keyDown(key)
-    pyautogui.keyUp(key)
+        cv2.imshow("result", img_map)
+        cv2.waitKey(1)
 
-def admin_swipe_card():
-    time.sleep(2)
-    timedKeyPress(0.5, "right")
-    timedKeyPress(1, "down")
-    timedKeyPress(0.7, "left")
-    timedKeyPress(2.8, "down")
-    timedKeyPress(2.5, "right")
-    timedKeyPress(0.5, "down")
-    tasks.start_task()
-    tasks.swipe_card()
-    timedKeyPress(0.5, "up")
-    timedKeyPress(2.5, "left")
-    timedKeyPress(2.8, "up")
-    timedKeyPress(0.7, "right")
-    timedKeyPress(1, "up")
-    timedKeyPress(0.5, "left")
+def find_path(current_pos_x, current_pos_y, pix):
+    dir = None
+    path = []
+    current_pos = (current_pos_x, current_pos_y)
+    destination = (643, 310)
+    while True:
+        current_pos_x = current_pos[0]
+        current_pos_y = current_pos[1]
+        possible = [(current_pos_x-1, current_pos_y), (current_pos_x+1, current_pos_y), (current_pos_x, current_pos_y-1), (current_pos_x, current_pos_y+1)]
+        if current_pos == destination:
+            print("ARRIVED!")
+            break
+        elif (dir == None) or (pix[possible[dir]] != (255, 255, 255)):
+            end_counter = 0
+            for moves in possible:
+                print(pix[moves])
+                if pix[moves] >= (254, 254, 254):
+                    pix[current_pos] = (0, 255, 0)
+                    dir = possible.index(moves)
+                    current_pos = moves
+                    break
+                else:
+                    end_counter += 1
+                
+            if end_counter == 4:
+                print("End")
+                break
+
+        else:
+            pix[current_pos] = (0, 255, 0)
+            current_pos = possible[dir]
+
+        if dir == 0:
+            print("Left")
+        if dir == 1:
+            print("Right")
+        if dir == 2:
+            print("Up")
+        if dir == 3:
+            print("Down")
+
+
+        print(current_pos)
