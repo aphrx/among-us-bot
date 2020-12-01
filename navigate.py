@@ -70,34 +70,35 @@ def pathfinding():
     img_map_og = np.array(img_map_pix)
 
     nodes = (0, 254, 0)
-    while True:
-        img_map_pix = Image.open('result_test.jpg')
-        img_map = np.array(img_map_pix)
-        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
-        img = np.array(imgGrab)
-        img[467:655, 836:984] = [0, 0, 0]
-        img[504:553, 1055:1216] = [0, 0, 0]
-        img[560:600, 628:837] = [0, 0, 0]
-        
-        pix_map = img_map_pix.load()
-        Y,X = np.where(np.all(img==marker, axis=2))
-        x = 0
-        y = 0
-        for i in range(len(X)):
-            x = int(X[i]/2)
-            y = int(Y[i]/2)
-            if pix_map[x, y] == (255, 255, 255):
-                img_map[y, x] = [198, 17, 17]
-                img_map[y-1:y+1, x-1:x+1] = [198, 17, 17]
-                break
-        find_path(x, y, pix_map)
+    #while True:
+    img_map_pix = Image.open('result_test.jpg')
+    img_map = np.array(img_map_pix)
+    imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+    img = np.array(imgGrab)
+    img[467:655, 836:984] = [0, 0, 0]
+    img[504:553, 1055:1216] = [0, 0, 0]
+    img[560:600, 628:837] = [0, 0, 0]
+    
+    pix_map = img_map_pix.load()
+    Y,X = np.where(np.all(img==marker, axis=2))
+    x = 0
+    y = 0
+    for i in range(len(X)):
+        x = int(X[i]/2)
+        y = int(Y[i]/2)
+        if pix_map[x, y] == (255, 255, 255):
+            img_map[y, x] = [198, 17, 17]
+            img_map[y-1:y+1, x-1:x+1] = [198, 17, 17]
+            break
+    find_path(x, y, pix_map)
 
-        cv2.imshow("result", img_map)
-        cv2.waitKey(1)
+    cv2.imshow("result", img_map)
+    cv2.waitKey(0)
 
 def find_path(current_pos_x, current_pos_y, pix):
     dir = None
     path = []
+    nodes = []
     current_pos = (current_pos_x, current_pos_y)
     destination = (643, 310)
     while True:
@@ -107,26 +108,48 @@ def find_path(current_pos_x, current_pos_y, pix):
         if current_pos == destination:
             print("ARRIVED!")
             break
-        elif (dir == None) or (pix[possible[dir]] != (255, 255, 255)):
+        elif (dir == None) or (pix[possible[dir]] < (240, 240, 240)):
             end_counter = 0
             for moves in possible:
-                print(pix[moves])
-                if pix[moves] >= (254, 254, 254):
-                    pix[current_pos] = (0, 255, 0)
+                if pix[moves] != (255, 0, 0) and pix[moves] >= (240, 240, 240):
+                    pix[current_pos] = (255, 0, 0)
                     dir = possible.index(moves)
+                    path.append(current_pos)
                     current_pos = moves
-                    break
                 else:
                     end_counter += 1
-                
+            
             if end_counter == 4:
-                print("End")
-                break
-
+                if len(nodes) != 0:
+                    node_index = path.index(nodes[-1])
+                    path = path[:node_index+1]
+                    current_pos = path[-1]
+                else:
+                    print("END")
+                    break
+            
+            elif end_counter != 3:
+                nodes.append(current_pos)
+                print("EC Node: " + str(current_pos))
         else:
-            pix[current_pos] = (0, 255, 0)
+            white_counter = 0
+            path.append(current_pos)
+            for moves in possible:
+                if pix[moves] != (255, 0, 0) and pix[moves] >= (240, 240, 240):
+                    white_counter += 1
+            
+            if white_counter != 1:
+                nodes.append(current_pos)
+                print("WC Node: " + str(current_pos))
+
+            pix[current_pos] = (255, 0, 0)
             current_pos = possible[dir]
 
+        print(current_pos)
+        print(pix[452, 369])
+    print(nodes)
+    print(path)
+'''
         if dir == 0:
             print("Left")
         if dir == 1:
@@ -135,6 +158,6 @@ def find_path(current_pos_x, current_pos_y, pix):
             print("Up")
         if dir == 3:
             print("Down")
+'''
 
-
-        print(current_pos)
+        
