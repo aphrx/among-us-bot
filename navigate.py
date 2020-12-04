@@ -70,30 +70,33 @@ def pathfinding():
     img_map_og = np.array(img_map_pix)
 
     nodes = (0, 254, 0)
-    #while True:
-    img_map_pix = Image.open('result_test.jpg')
-    img_map = np.array(img_map_pix)
-    imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
-    img = np.array(imgGrab)
-    img[467:655, 836:984] = [0, 0, 0]
-    img[504:553, 1055:1216] = [0, 0, 0]
-    img[560:600, 628:837] = [0, 0, 0]
-    
-    pix_map = img_map_pix.load()
-    Y,X = np.where(np.all(img==marker, axis=2))
-    x = 0
-    y = 0
-    for i in range(len(X)):
-        x = int(X[i]/2)
-        y = int(Y[i]/2)
-        if pix_map[x, y] == (255, 255, 255):
-            img_map[y, x] = [198, 17, 17]
-            img_map[y-1:y+1, x-1:x+1] = [198, 17, 17]
-            break
-    find_path(x, y, pix_map)
+    while True:
+        img_map_pix = Image.open('result_test.jpg')
+        img_map = np.array(img_map_pix)
+        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+        img = np.array(imgGrab)
+        img[467:655, 836:984] = [0, 0, 0]
+        img[504:553, 1055:1216] = [0, 0, 0]
+        img[560:600, 628:837] = [0, 0, 0]
+        
+        pix_map = img_map_pix.load()
+        Y,X = np.where(np.all(img==marker, axis=2))
+        x = 0
+        y = 0
 
-    cv2.imshow("result", img_map)
-    cv2.waitKey(0)
+        for i in range(len(X)):
+            x = int(X[i]/2)
+            y = int(Y[i]/2)
+            if pix_map[x, y] > (240, 240, 240):
+                img_map[y, x] = [198, 17, 17]
+                img_map[y-5:y+5, x-5:x+5] = [198, 17, 17]
+                break
+        #path = find_path(x, y, pix_map)
+
+        
+
+        cv2.imshow("result", img_map)
+        cv2.waitKey(0)
 
 def find_path(current_pos_x, current_pos_y, pix):
     dir = None
@@ -147,8 +150,7 @@ def find_path(current_pos_x, current_pos_y, pix):
 
         print(current_pos)
         print(pix[452, 369])
-    print(nodes)
-    print(path)
+    return path
 '''
         if dir == 0:
             print("Left")
