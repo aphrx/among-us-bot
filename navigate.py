@@ -4,6 +4,7 @@ import tasks
 from PIL import ImageGrab, Image
 import cv2
 import numpy as np
+import random
 
 marker = (198, 17, 17)
 marker_arrived = (228, 132, 10)
@@ -34,6 +35,8 @@ def get_screen():
     img[560:600, 628:837] = [0, 0, 0]
     pix = imgGrab.load()
     return img, pix
+
+
 
 def custom_map():
     
@@ -77,41 +80,52 @@ def custom_map():
     cv2.destroyAllWindows()
 
 def pathfinding():
-    
-    #for task in tasks:
-    destination = tasks[0][1]
     img_map_pix = Image.open('result_test_2.jpg')
+    for task in tasks:
+        destination = task[1]
+        
+        img_map = np.array(img_map_pix)
+        img=Image.fromarray(img_map)
+        img.save('before_run.png')
+        pix_map = img_map_pix.load()
 
-    img_map_pix = Image.open('result_test_2.jpg')
-    img_map = np.array(img_map_pix)
-    imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
-    img = np.array(imgGrab)
-    img[467:655, 836:984] = [0, 0, 0]
-    img[504:553, 1055:1216] = [0, 0, 0]
-    img[560:600, 628:837] = [0, 0, 0]
-    
-    pix_map = img_map_pix.load()
-    
-    Y,X = np.where(np.all(img==marker, axis=2))
-    if len(X) == 0:
-        Y,X = np.where(np.all(img==marker_arrived, axis=2))
-    x = 0
-    y = 0
+        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+        img = np.array(imgGrab)
+        img[467:655, 836:984] = [0, 0, 0]
+        img[504:553, 1055:1216] = [0, 0, 0]
+        img[560:600, 628:837] = [0, 0, 0]
+        
+        colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220)]
+        
+        x = 0
+        y = 0
 
-    for i in range(len(X)):
-        x = int(X[i]/2)
-        y = int(Y[i]/2)
-        if pix_map[x, y] > (210, 210, 210):
-            img_map[y, x] = [198, 17, 17]
-            img_map[y-3:y+3, x-3:x+3] = [198, 17, 17]
-            break
+        for color in colors:
+            Y,X = np.where(np.all(img==color, axis=2))
+            for i in range(len(X)):
+                xt = int(X[i]/2)
+                yt = int(Y[i]/2)
+                print(str(xt) + ", " + str(yt))
+                if pix_map[xt, yt] > (210, 210, 210):
+                    x = xt
+                    y = yt
+                    img_map[y, x] = [198, 17, 17]
+                    break
+        
+        if x == 0:
+            print("Can't find")
+            
+            return
 
-    path, directions = find_path((x, y), pix_map, destination)
+        print(pix_map[x, y])
+        print(str(x) + ", " + str(y))
 
-    for i in path:
-        img_map[i[1], i[0]] = (0, 255, 0)
+        path, directions = search((x, y), destination, img_map, pix_map)
 
-        #navigate(path, directions, img_map, destination)
+        for i in path:
+            img_map[i[1], i[0]] = (0, 255, 0)
+
+        navigate(path, directions, img_map, destination)
 
     
 
@@ -132,6 +146,7 @@ def navigate(path, directions, img_map, destination):
     turns.append([path[-1], -1])
 
     print(turns)
+
     dir = None
     while len(turns) > 0:
         img_map = img_map_org
@@ -148,7 +163,7 @@ def navigate(path, directions, img_map, destination):
             y += int(Y[i]/2)
         x = int(x/len(X))-10
         y = int(y/len(Y))+10
-        p = 10
+        p = 15
             
         img_map[y-p:y+p, x-p:x+p] = [198, 17, 17]
 
@@ -157,21 +172,78 @@ def navigate(path, directions, img_map, destination):
 
         if pixel[destination] == (198,17,17):
             print("Arrived")
-            pyautogui.keyUp(pyautogui_directions[dir])
+            if dir is not None:
+                pyautogui.keyUp(pyautogui_directions[dir])
             break
 
         elif pixel[(turns[0][0][0]), (turns[0][0][1])] == (198, 17, 17) or dir is None:
             print("at node")
             if dir != None:
                 pyautogui.keyUp(pyautogui_directions[dir])
-            dir = turns[3][1]
+            dir = turns[0][1]
             turns.pop(0) 
                     
         pyautogui.keyDown(pyautogui_directions[dir])
 
         cv2.imshow("result", img_map)
         cv2.waitKey(1)
-    cv2.destroyAllWindows()       
+    cv2.destroyAllWindows()    
+
+def search(start, end, img, pix):
+    print(start)
+    isFound = False
+    current = start
+    array = np.array(img)
+    path = []
+    intersects = []
+    directions = []
+    path.append(current)
+    while isFound is False:
+        possible = []
+        surroundings = [(current[0]-1, current[1]),
+                        (current[0]+1, current[1]),
+                        (current[0], current[1]-1),
+                        (current[0], current[1]+1)]
+
+
+        for move in surroundings:
+            if end == move:
+                isFound = True
+            if (pix[move] >= (200, 200, 200) and pix[move] != (255, 255, 0)):
+                possible.append(move)
+        
+        if len(possible) >= 2:
+            if current not in intersects:
+                intersects.append(current)
+        if len(possible) == 0:
+            intersects_reversed = intersects[::-1]
+            for i in intersects_reversed:
+                if i != current:
+                    current = i
+                    intersects.pop(intersects.index(i))
+                    
+                    break
+            ind = path.index(current)
+            path = path[:ind]
+            directions = directions[:ind]
+            
+            
+        else:
+            current = random.choice(possible)
+        
+        print(current)
+        path.append(current)
+        if current in surroundings:
+            directions.append(surroundings.index(current))
+        array[current[1], current[0]] = (255, 255, 0)
+        img=Image.fromarray(array)
+        pix = img.load()
+    for p in path:
+        array[p[1], p[0]] = (0, 255, 0)
+    img=Image.fromarray(array)
+    img.save('image.png')
+    return path, directions
+   
 
 def find_path(current_pos, pix, destination):
     print(current_pos)
