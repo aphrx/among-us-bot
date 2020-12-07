@@ -147,6 +147,7 @@ def navigate(path, directions, img_map, destination):
 
     print(turns)
 
+
     dir = None
     while len(turns) > 0:
         img_map = img_map_org
