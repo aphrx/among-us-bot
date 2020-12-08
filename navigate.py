@@ -8,11 +8,23 @@ import random
 
 marker = (198, 17, 17)
 marker_arrived = (228, 132, 10)
-tasks = [["Admin Swipe", (641, 337)], 
+tasks = [["Admin Swipe", (640, 337)], 
         ["Fuel Engine (Storage)", (466, 449)],
-        ["Fix Wires (Electrical)", (372, 323)],
+        ["Fix Wires (Electrical)", (368, 323)],
+        ["Fix Wires (Storage)", (491, 355)],
+        ["Fix Wires (Security)", (201, 269)],
         ["Calibrate Distributor", (410, 323)],
         ["Divert Power", (329, 323)],
+        ["Fuel Engine (Lower Engine)", (150, 433)],
+        ["Fuel Engine (Upper Engine)", (146, 175)],
+        ["Start Reactor", (89, 271)],
+        ["Unlock Manifolds", (68, 213)],
+        ["Medbay Scan", (382, 270)],
+        ["Inspect Sample", (394, 253)],
+        ["Empty Garbage (Cafeteria)", (613, 82)],
+        ["Download (Cafeteria)", (601, 71)],
+        ["Upload (Admin)", (582, 301)],
+        ["Prime Shields", (684, 459)],
         ]
 
 def map():
@@ -112,13 +124,11 @@ def pathfinding():
                     img_map[y, x] = [198, 17, 17]
                     break
         
-        if x == 0:
-            print("Can't find")
-            
-            return
-
-        print(pix_map[x, y])
         print(str(x) + ", " + str(y))
+
+        if x == 0:
+            print("Can't find") 
+            return
 
         path, directions = search((x, y), destination, img_map, pix_map)
 
@@ -162,8 +172,9 @@ def navigate(path, directions, img_map, destination):
         for i in range(len(X)):
             x += int(X[i]/2)
             y += int(Y[i]/2)
-        x = int(x/len(X))-10
-        y = int(y/len(Y))+10
+        if len(X) != 0:
+            x = int(x/len(X))-10
+            y = int(y/len(Y))+10
         p = 15
             
         img_map[y-p:y+p, x-p:x+p] = [198, 17, 17]
