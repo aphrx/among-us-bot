@@ -8,24 +8,23 @@ import random
 
 marker = (198, 17, 17)
 marker_arrived = (228, 132, 10)
-tasks = [["Admin Swipe", (640, 337)], 
-        ["Fuel Engine (Storage)", (466, 449)],
+tasks = [["Admin Swipe", (635, 337)], 
+        ["Fuel Engine (Storage)", (465, 450)],
         ["Fix Wires (Electrical)", (368, 323)],
-        ["Fix Wires (Storage)", (491, 355)],
+        ["Fix Wires (Storage)", (475, 343)],
         ["Fix Wires (Security)", (201, 269)],
         ["Calibrate Distributor", (410, 323)],
         ["Divert Power", (329, 323)],
-        ["Fuel Engine (Lower Engine)", (150, 433)],
+        ["Fuel Engine (Lower Engine)", (150, 425)],
         ["Fuel Engine (Upper Engine)", (146, 175)],
-        ["Start Reactor", (89, 271)],
-        ["Unlock Manifolds", (68, 213)],
-        ["Medbay Scan", (382, 270)],
+        ["Start Reactor", (78, 271)],
+        ["Unlock Manifolds", (60, 213)],
+        ["Medbay Scan", (368, 273)],
         ["Inspect Sample", (394, 253)],
         ["Empty Garbage (Cafeteria)", (613, 82)],
         ["Download (Cafeteria)", (601, 71)],
-        ["Upload (Admin)", (582, 301)],
-        ["Prime Shields", (684, 459)],
-        ]
+        ["Upload (Admin)", (568, 289)],
+        ["Prime Shields", (684, 459)]]
 
 def map():
     print("Where would you like to go?:")
@@ -93,8 +92,10 @@ def custom_map():
 
 def pathfinding():
     img_map_pix = Image.open('result_test_2.jpg')
-    for task in tasks:
-        destination = task[1]
+    while True:
+        rand = random.choice(tasks)
+        destination = rand[1]
+        print(rand[0])
         
         img_map = np.array(img_map_pix)
         img=Image.fromarray(img_map)
@@ -118,14 +119,12 @@ def pathfinding():
                 xt = int(X[i]/2)
                 yt = int(Y[i]/2)
                 print(str(xt) + ", " + str(yt))
-                if pix_map[xt, yt] > (210, 210, 210):
+                if pix_map[xt, yt] > (200, 200, 200):
                     x = xt
                     y = yt
                     img_map[y, x] = [198, 17, 17]
                     break
         
-        print(str(x) + ", " + str(y))
-
         if x == 0:
             print("Can't find") 
             return
@@ -155,17 +154,15 @@ def navigate(path, directions, img_map, destination):
             turns.append([path[i], directions[i]])
     turns.append([path[-1], -1])
 
-    print(turns)
-
-
     dir = None
     while len(turns) > 0:
         img_map = img_map_org
         img, pix = get_screen()
 
-        Y,X = np.where(np.all(img==marker, axis=2))
+        Y,X = np.where(np.all(img==marker_arrived, axis=2))
+        
         if len(X) == 0:
-            Y,X = np.where(np.all(img==marker_arrived, axis=2))
+            Y,X = np.where(np.all(img==marker, axis=2))
         x = 0
         y = 0
 
@@ -175,12 +172,11 @@ def navigate(path, directions, img_map, destination):
         if len(X) != 0:
             x = int(x/len(X))-10
             y = int(y/len(Y))+10
-        p = 15
+        p = 14
             
         img_map[y-p:y+p, x-p:x+p] = [198, 17, 17]
 
         pixel = Image.fromarray(img_map, 'RGB').load()
-        #print(pixel[(turns[0][0][0]), (turns[0][0][1])])
 
         if pixel[destination] == (198,17,17):
             print("Arrived")
@@ -189,7 +185,6 @@ def navigate(path, directions, img_map, destination):
             break
 
         elif pixel[(turns[0][0][0]), (turns[0][0][1])] == (198, 17, 17) or dir is None:
-            print("at node")
             if dir != None:
                 pyautogui.keyUp(pyautogui_directions[dir])
             dir = turns[0][1]
@@ -233,27 +228,31 @@ def search(start, end, img, pix):
                 if i != current:
                     current = i
                     intersects.pop(intersects.index(i))
-                    
                     break
             ind = path.index(current)
             path = path[:ind]
             directions = directions[:ind]
-            
-            
+        
         else:
             current = random.choice(possible)
         
-        print(current)
+        #print(current)
+
         path.append(current)
         if current in surroundings:
             directions.append(surroundings.index(current))
         array[current[1], current[0]] = (255, 255, 0)
         img=Image.fromarray(array)
         pix = img.load()
+
+        cv2.imshow("result", array)
+        cv2.waitKey(1)
     for p in path:
         array[p[1], p[0]] = (0, 255, 0)
     img=Image.fromarray(array)
     img.save('image.png')
+    cv2.destroyAllWindows() 
+
     return path, directions
    
 
