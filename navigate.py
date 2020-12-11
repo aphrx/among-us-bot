@@ -19,11 +19,13 @@ tasks = [["Admin Swipe", (635, 337)],
         ["Fuel Engine (Upper Engine)", (146, 175)],
         ["Start Reactor", (78, 271)],
         ["Unlock Manifolds", (60, 213)],
-        ["Medbay Scan", (368, 273)],
+        ["Medbay Scan", (360, 268)],
         ["Inspect Sample", (394, 253)],
-        ["Empty Garbage (Cafeteria)", (613, 82)],
-        ["Download (Cafeteria)", (601, 71)],
+        ["Empty Garbage (Cafeteria)", (623, 81)],
+        ["Download (Cafeteria)", (601, 60)],
         ["Upload (Admin)", (568, 289)],
+        ["Align Engine (Upper Engine)", (130, 179)],
+        ["Align Engine (Lower Engine)", (133, 425)],
         ["Prime Shields", (684, 459)]]
 
 def map():
@@ -108,7 +110,7 @@ def pathfinding():
         img[504:553, 1055:1216] = [0, 0, 0]
         img[560:600, 628:837] = [0, 0, 0]
         
-        colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220)]
+        colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27)]
         
         x = 0
         y = 0
