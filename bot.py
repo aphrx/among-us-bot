@@ -8,6 +8,64 @@ import navigate
 import tasks
 from pytesseract import Output
 
+tasks_loc = [
+        ["Align Engine (Upper Engine)", (273, 355)],#
+        ["Align Engine (Lower Engine)", (275, 854)],#
+
+        ["Calibrate Distributor", (817, 643)],#
+
+        ["Chart Course", (1796, 432)],#
+
+        ["Clean O2 Filter", (1293, 460)],#
+
+        ["Clear Asteroids", (1430, 262)],#
+
+        ["Divert Power", (690, 635)], #
+        ["Accept Power (Communications)", (1310, 914)],#
+        ["Accept Power (Lower Engine)", (322, 717)],#
+        ["Accept Power (Upper Engine)", (352, 209)],#
+        ["Accept Power (Navigation)", (1712, 437)],#
+        ["Accept Power (O2)", (1400, 441)],#
+        ["Accept Power (Security)", (562, 462)],#
+        ["Accept Power (Shields)", (1496, 763)],#
+        ["Accept Power (Weapons)", (1525, 252)],#
+
+        ["Empty Garbage/Chute (Cafeteria)", (1241, 176)],#
+        ["Empty Garbage/Chute (O2)", (1260, 473)],#
+        ["Empty Garbage/Chute (Storage)", (1092, 1020)],#
+
+        ["Fix Wires (Electrical)", (742, 651)], #
+        ["Fix Wires (Storage)", (978, 696)],#
+        ["Fix Wires (Security)", (422, 528)],#
+        ["Fix Wires (Navigation)", (832, 241)],
+        ["Fix Wires (Admin)", (1114, 599)],#
+        ["Fix Wires (Cafeteria)", (841, 124)],#
+
+        ["Fuel Engine (Storage)", (941, 906)],#
+        ["Fuel Engine (Lower Engine)", (308, 852)],#
+        ["Fuel Engine (Upper Engine)", (308, 350)],#
+
+        ["Inspect Sample", (808, 513)], #
+
+        ["Prime Shields", (1367, 910)],#
+
+        ["Stabilize Steering", (1824, 532)],#
+
+        ["Start Reactor", (166, 565)],#
+
+        ["Submit Scan", (757, 552)],#
+
+        ["Swipe Card", (1289, 691)], #Changed
+
+        ["Unlock Manifolds", (135, 440)],#
+        
+        ["Download/Upload (Cafeteria)", (1200, 137)],#
+        ["Download/Upload (Admin)", (1160, 593)],#
+        ["Download/Upload (Communications)", (1215, 908)], #changed
+        ["Download/Upload (Electrical)", (655, 585)], #
+        ["Download/Upload (Navigation)", (1752, 438)],#
+        ["Download/Upload (Weapons)", (1413, 177)]] #
+
 class Bot:
     def __init__(self):
         self.name = "Aphrx"
@@ -26,76 +84,31 @@ class Bot:
         if(option == 2):
             tasks.menu()
         if(option == 3):
-            navigate.map()
+            navigate.pathfinding()
 
     def startup(self):
-        self.scale_percent = 60 # percent of original size
+        self.scale_percent = 100 # percent of original size
         self.width = int(1920 * self.scale_percent / 100)
         self.height = int(1080 * self.scale_percent / 100)
         self.dim = (self.width, self.height)
-        self.buffer(2)
+        self.select_screen()
         self.read_map()
-        #self.getVideo()
 
     def read_map(self):
-        task_locations = [
-            #(807, 511), # Medbay: Sample
-            (1290, 691) # Admin: Swipe Card
-        ]
-        task = (235, 221, 4)
         pyautogui.press("tab")
         img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
         pix = img.load()
+        task = None
+        for t in tasks_loc:
+            if pix[t[1]] > (190, 190, 0) and pix[t[1]] < (255, 255, 80) and pix[t[1]][2] < 200:
+                print(t[0])
+                print(pix[t[1]])
+                task = t
         
-        for tasks in task_locations:
-            if pix[tasks] == task:
-               navigate.admin_swipe_card()
+        navigate.pathfinding(tasks_loc.index(task))
 
-    def getVideo(self):
-        pyautogui.press("tab")
-        while(True):
-            img = ImageGrab.grab(bbox=(0,0 ,1920,1080)) #bbox specifies specific region (bbox= x,y,width,height)
-            img_np = np.array(img)
-            frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
-            frame_hsv = cv2.cvtColor(img_np, cv2.COLOR_BGR2HSV)
-            frame_r_hsv = cv2.resize(frame_hsv, (0,0), fx=0.5, fy=0.5)
-            self.playerLocation(frame_r_hsv)
-            
-        cv2.destroyAllWindows()
-
-        
-    def timedKeyPress(self, dur):
-        end = time.time() + dur
-        while(time.time() < end):
-            pyautogui.keyDown("up")
-        pyautogui.keyUp("tab")
-
-    def determineTasks(self, img):
-        self.timedKeyPress(5)
-        print("Looking for tasks")
-        tasks = []
-        output = img.copy()
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.medianBlur(gray, 5)
-        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 20,
-                                param1=100, param2=30, minRadius=15, maxRadius=25)
-        if circles is not None:
-            detected_circles = np.uint16(np.around(circles))
-            for (x, y ,r) in detected_circles[0, :]:
-                print(x, y, r)
-                if (x == 70 and y == 70 or x == 72 and y == 72 or x==72 and y == 70 or  x == 924 and y == 108 or x == 926 and y == 36):
-                    continue
-                tasks.append([x, y])
-                cv2.circle(output, (x, y), r, (0, 0, 0), 3)
-                cv2.circle(output, (x, y), 2, (0, 255, 255), 3)
-        return tasks, output
-        
-
-    def buffer(self, timer):
-        for i in range(timer):
-            print(self.name + " will start in " + str(timer-i))
-            time.sleep(1)
-        
+    def select_screen(self):
+        pyautogui.click(int(self.width/2), int(self.height/2))
     
 bot = Bot()
 bot.menu()

@@ -18,7 +18,7 @@ tasks = [
 
         ["Clean O2 Filter", (650, 227)],
 
-        ["Clear Asteroids", (718, 123)],
+        ["Clear Asteroids", (707, 123)],
 
         ["Divert Power", (329, 323)],
         ["Accept Power (Communications)", (656, 461)],
@@ -36,7 +36,7 @@ tasks = [
 
         ["Fix Wires (Electrical)", (368, 323)],
         ["Fix Wires (Storage)", (475, 343)],
-        ["Fix Wires (Security)", (201, 269)],
+        ["Fix Wires (Security)", (201, 255)],
         ["Fix Wires (Navigation)", (832, 241)],
         ["Fix Wires (Admin)", (549, 289)],
         ["Fix Wires (Cafeteria)", (421, 62)],
@@ -55,28 +55,16 @@ tasks = [
 
         ["Submit Scan", (360, 268)],
 
-        ["Swipe Card", (635, 337)], 
+        ["Swipe Card", (1289, 693)], 
 
         ["Unlock Manifolds", (60, 213)],
         
         ["Download/Upload (Cafeteria)", (601, 60)],
         ["Download/Upload (Admin)", (568, 289)],
-        ["Download/Upload (Communications)", (606, 468)],
+        ["Download/Upload (Communications)", (604, 453)],
         ["Download/Upload (Electrical)", (317, 323)],
         ["Download/Upload (Navigation)", (888, 211)],
         ["Download/Upload (Weapons)", (694, 86)]]
-
-def map():
-    print("Where would you like to go?:")
-    print("[1] Custom Map")
-    print("[2] Pathfinding")
-
-    option = int(input('options:'))
-
-    if(option == 1):
-        custom_map()
-    if(option == 2):
-        pathfinding()
 
 def get_screen():
     imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
@@ -87,98 +75,56 @@ def get_screen():
     pix = imgGrab.load()
     return img, pix
 
-
-
-def custom_map():
-    
-    trail = []
-    while True:
-        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
-        img = np.array(imgGrab)
-        img[467:655, 836:984] = [0, 0, 0]
-        img[504:553, 1055:1216] = [0, 0, 0]
-        img[560:600, 628:837] = [0, 0, 0]
-        pix = imgGrab.load()
-
-        result = np.zeros((540, 960, 3), dtype = "uint8")
-        Y,X = np.where(np.all(img==marker_arrived, axis=2))
-
-        for t in trail:
-            y = int(t[1])
-            x = int(t[0])
-            result[y-1:y+1, x-1:x+1] = [255, 255, 255]
-
-        if len(X) == 0:
-            Y,X = np.where(np.all(img==marker, axis=2))
-        if len(X) != 0:
-            img[Y[0]-1:Y[0]+1, X[0]-1:X[0]+1] = [198, 17, 17]
-            y = int(Y[0]/2)
-            x = int(X[0]/2)
-            print(str(x) + ", " + str(y))
-            trail.append([x, y])
-            result[y-1:y+1, x-1:x+1] = [198, 17, 17]
-        
-
-        for task in tasks:
-            if pix[task[1]][0] > 200:
-                y = int(task[1][1]/2)
-                x = int(task[1][0]/2)
-                result[y-3:y+3, x-3:x+3] = [245, 226, 4]
-  
-        cv2.imwrite("result.png", cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-        cv2.imshow('Result', cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-        cv2.waitKey(1)
-    cv2.destroyAllWindows()
-
-def pathfinding():
+def pathfinding(i):
     img_map_pix = Image.open('result_test_2.jpg')
-    while True:
-        rand = random.choice(tasks)
-        destination = rand[1]
-        print(rand[0])
-        
-        img_map = np.array(img_map_pix)
-        img=Image.fromarray(img_map)
-        img.save('before_run.png')
-        pix_map = img_map_pix.load()
+    #while True:
+        #rand = random.choice(tasks)
+    destination = tasks[i][1]
+    print(tasks[i][0])
+    
+    img_map = np.array(img_map_pix)
+    img=Image.fromarray(img_map)
+    img.save('before_run.png')
+    pix_map = img_map_pix.load()
 
-        imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
-        img = np.array(imgGrab)
-        img[467:655, 836:984] = [0, 0, 0]
-        img[504:553, 1055:1216] = [0, 0, 0]
-        img[560:600, 628:837] = [0, 0, 0]
-        
-        colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27)]
-        
-        x = 0
-        y = 0
+    imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
+    img = np.array(imgGrab)
+    img[467:655, 836:984] = [0, 0, 0]
+    img[504:553, 1055:1216] = [0, 0, 0]
+    img[560:600, 628:837] = [0, 0, 0]
+    
+    colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27)]
+    
+    x = 0
+    y = 0
 
-        for color in colors:
-            Y,X = np.where(np.all(img==color, axis=2))
-            for i in range(len(X)):
-                xt = int(X[i]/2)
-                yt = int(Y[i]/2)
-                print(str(xt) + ", " + str(yt))
-                if pix_map[xt, yt] > (200, 200, 200):
-                    x = xt
-                    y = yt
-                    #img_map[y, x] = [198, 17, 17]
-                    break
-        
-        if x == 0:
-            print("Can't find") 
-            return
+    for color in colors:
+        Y,X = np.where(np.all(img==color, axis=2))
+        for i in range(len(X)):
+            xt = int(X[i]/2)
+            yt = int(Y[i]/2)
+            print(str(xt) + ", " + str(yt))
+            if pix_map[xt, yt] > (200, 200, 200):
+                x = xt
+                y = yt
+                #img_map[y, x] = [198, 17, 17]
+                break
+    
+    if x == 0:
+        print("Can't find") 
+        return
 
-        path, directions = search((x, y), destination, img_map, pix_map)
+    path, directions = search((x, y), destination, img_map, pix_map)
 
-        for i in path:
-            img_map[i[1], i[0]] = (0, 255, 0)
+    for i in path:
+        img_map[i[1], i[0]] = (0, 255, 0)
 
-        navigate(path, directions, img_map, destination)
+    navigate(path, directions, img_map, destination)
 
     
 
 def navigate(path, directions, img_map, destination):
+    log = []
     img_map_org = img_map
     direction = None
     turns = []
@@ -212,7 +158,12 @@ def navigate(path, directions, img_map, destination):
         if len(X) != 0:
             x = int(x/len(X))-10
             y = int(y/len(Y))+10
+            log.append([x, y])
         p = 14
+
+        if(len(log) > 10 and log[-1] == log[-10]):
+            print("Stuck")
+            wiggle(log[-1], turns[0][0], dir)
             
         img_map[y-p:y+p, x-p:x+p] = [198, 17, 17]
 
@@ -234,7 +185,29 @@ def navigate(path, directions, img_map, destination):
 
         cv2.imshow("result", img_map)
         cv2.waitKey(1)
-    cv2.destroyAllWindows()    
+    cv2.destroyAllWindows()
+
+def wiggle(current, turn, dir):
+    print("current location " + str(current))
+    print("next turn " + str(turn))
+    print(dir)
+    key = None
+
+    if dir == 0 or dir == 1:
+        if current[1] > turn[1]:
+            key = "up"
+        else:
+            key = "down"
+    elif dir == 2 or dir == 3:
+        if current[0] > turn[0]:
+            key = "left"
+        else:
+            key = "right"
+    
+    pyautogui.keyDown(key)
+    time.sleep(0.1)
+    pyautogui.keyUp(key)
+    
 
 def search(start, end, img, pix):
     print(start)
@@ -375,3 +348,5 @@ def find_path(current_pos, pix, destination):
         print(current_pos)
 
     return path, directions
+
+    
