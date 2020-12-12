@@ -8,25 +8,63 @@ import random
 
 marker = (198, 17, 17)
 marker_arrived = (228, 132, 10)
-tasks = [["Admin Swipe", (635, 337)], 
-        ["Fuel Engine (Storage)", (465, 450)],
+tasks = [
+        ["Align Engine (Upper Engine)", (130, 179)],
+        ["Align Engine (Lower Engine)", (133, 425)],
+
+        ["Calibrate Distributor", (410, 323)],
+
+        ["Chart Course", (903, 236)],
+
+        ["Clean O2 Filter", (650, 227)],
+
+        ["Clear Asteroids", (718, 123)],
+
+        ["Divert Power", (329, 323)],
+        ["Accept Power (Communications)", (656, 461)],
+        ["Accept Power (Lower Engine)", (157, 356)],
+        ["Accept Power (Upper Engine)", (172, 105)],
+        ["Accept Power (Navigation)", (860, 211)],
+        ["Accept Power (O2)", (705, 216)],
+        ["Accept Power (Security)", (274, 224)],
+        ["Accept Power (Shields)", (745, 375)],
+        ["Accept Power (Weapons)", (760, 123)],
+
+        ["Empty Garbage/Chute (Cafeteria)", (623, 81)],
+        ["Empty Garbage/Chute (O2)", (635, 239)],
+        ["Empty Garbage/Chute (Storage)", (539, 520)],
+
         ["Fix Wires (Electrical)", (368, 323)],
         ["Fix Wires (Storage)", (475, 343)],
         ["Fix Wires (Security)", (201, 269)],
-        ["Calibrate Distributor", (410, 323)],
-        ["Divert Power", (329, 323)],
+        ["Fix Wires (Navigation)", (832, 241)],
+        ["Fix Wires (Admin)", (549, 289)],
+        ["Fix Wires (Cafeteria)", (421, 62)],
+
+        ["Fuel Engine (Storage)", (465, 450)],
         ["Fuel Engine (Lower Engine)", (150, 425)],
         ["Fuel Engine (Upper Engine)", (146, 175)],
-        ["Start Reactor", (78, 271)],
-        ["Unlock Manifolds", (60, 213)],
-        ["Medbay Scan", (360, 268)],
+
         ["Inspect Sample", (394, 253)],
-        ["Empty Garbage (Cafeteria)", (623, 81)],
-        ["Download (Cafeteria)", (601, 60)],
-        ["Upload (Admin)", (568, 289)],
-        ["Align Engine (Upper Engine)", (130, 179)],
-        ["Align Engine (Lower Engine)", (133, 425)],
-        ["Prime Shields", (684, 459)]]
+
+        ["Prime Shields", (684, 459)],
+
+        ["Stabilize Steering", (903, 261)],
+
+        ["Start Reactor", (78, 271)],
+
+        ["Submit Scan", (360, 268)],
+
+        ["Swipe Card", (635, 337)], 
+
+        ["Unlock Manifolds", (60, 213)],
+        
+        ["Download/Upload (Cafeteria)", (601, 60)],
+        ["Download/Upload (Admin)", (568, 289)],
+        ["Download/Upload (Communications)", (606, 468)],
+        ["Download/Upload (Electrical)", (317, 323)],
+        ["Download/Upload (Navigation)", (888, 211)],
+        ["Download/Upload (Weapons)", (694, 86)]]
 
 def map():
     print("Where would you like to go?:")
@@ -124,7 +162,7 @@ def pathfinding():
                 if pix_map[xt, yt] > (200, 200, 200):
                     x = xt
                     y = yt
-                    img_map[y, x] = [198, 17, 17]
+                    #img_map[y, x] = [198, 17, 17]
                     break
         
         if x == 0:
