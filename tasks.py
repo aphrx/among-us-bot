@@ -98,7 +98,6 @@ def menu():
         chart_course()
         menu()
     elif(option == 18):
-        #start_task()
         unlock_manifold()
         menu()
     else:
@@ -334,30 +333,30 @@ def unlock_manifold_get_numbers():
     return data.strip()
 
 def unlock_manifold():
-    data = unlock_manifold_get_numbers()
-    whitelist = "123456789N"
-    print(data)
-    if(len(data) != 10):
-        start_task()
-        unlock_manifold()
-    for i in data:
-        for j in whitelist:
-            if i == j:
-                whitelist = whitelist.replace(j, "")
-    if (whitelist == ""):
-        input_numbers(data)
-    else:
-        start_task()
-        unlock_manifold() 
+    while True:
+        data = unlock_manifold_get_numbers()
+        whitelist = "123456789N"
+        print(data)
+        if(len(data) != 10):
+            start_task()
+            continue
+        for i in data:
+            for j in whitelist:
+                if i == j:
+                    whitelist = whitelist.replace(j, "")
+        if (whitelist == ""):
+            input_numbers(data)
+            break
+        else:
+            start_task()
+            continue
 
 def input_numbers(data):
     numbers = [(660, 450), (820, 450), (960, 450), (1120, 450), (1260, 450), (660, 620), (820, 620), (960, 620), (1120, 620), (1260, 620)]
     order = list(data)
-    print("INPUTTING NUMBERS")
     for i in range(1, 11):
         for j in range(10):
             if order[j] == str(i) or (order[j] == "N" and i == 10):
-                print(order[j] + " matched with " + str(i))
                 pyautogui.moveTo(numbers[j])
                 pyautogui.click()
     time.sleep(10)

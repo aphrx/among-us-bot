@@ -16,7 +16,7 @@ tasks = [
 
         ["Chart Course", (903, 236)],
 
-        ["Clean O2 Filter", (635, 228           )],
+        ["Clean O2 Filter", (635, 228)],
 
         ["Clear Asteroids", (707, 123)],
 
@@ -34,7 +34,7 @@ tasks = [
         ["Empty Garbage/Chute (O2)", (635, 239)],
         ["Empty Garbage/Chute (Storage)", (534, 519)],
 
-        ["Fix Wires (Electrical)", (368, 323)],
+        ["Fix Wires (Electrical)", (368, 328)],
         ["Fix Wires (Storage)", (475, 343)],
         ["Fix Wires (Security)", (201, 255)],
         ["Fix Wires (Navigation)", (801, 241)],
@@ -63,7 +63,7 @@ tasks = [
         ["Download/Upload (Admin)", (552, 284)],
         ["Download/Upload (Communications)", (589, 453)],
         ["Download/Upload (Electrical)", (317, 323)],
-        ["Download/Upload (Navigation)", (888, 211)],
+        ["Download/Upload (Navigation)", (860, 211)],
         ["Download/Upload (Weapons)", (694, 86)]]
 
 def get_screen():
@@ -144,7 +144,7 @@ def navigate(path, directions, img_map, destination):
         Y,X = np.where(np.all(img==marker, axis=2))
         
         colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27), (220, 102, 10)]
-
+        print(dir)
         if len(X) != 0:
             for color in colors:
                 Y,X = np.where(np.all(img==color, axis=2))
@@ -164,8 +164,8 @@ def navigate(path, directions, img_map, destination):
         p = 14
 
         
-        if(len(log) > 20 and log[-1] == log[-20]):
-            if len(turns) == 1 and x == 0:
+        if((len(log) > 5 and log[-1] == log[-5]) or x == 0):
+            if len(turns) == 1:
                 break
             wiggle(log[-1], turns[0][0], dir)
             
@@ -173,13 +173,13 @@ def navigate(path, directions, img_map, destination):
 
         pixel = Image.fromarray(img_map, 'RGB').load()
 
-        if pixel[destination] == (198,17,17):
+        if pixel[destination][1] == 17:
             if dir is not None:
                 pyautogui.keyUp(pyautogui_directions[dir])
             return 1
 
         elif pixel[(turns[0][0][0]), (turns[0][0][1])] == (198, 17, 17) or dir is None:
-            if dir != None:
+            if dir is not None:
                 pyautogui.keyUp(pyautogui_directions[dir])
             dir = turns[0][1]
             turns.pop(0)
@@ -189,6 +189,7 @@ def navigate(path, directions, img_map, destination):
         cv2.imshow("result", img_map)
         cv2.waitKey(1)
     cv2.destroyAllWindows()
+    pyautogui.keyUp(pyautogui_directions[dir])
     return 1
 
 def wiggle(current, turn, dir):
@@ -204,7 +205,7 @@ def wiggle(current, turn, dir):
             key = "left"
         else:
             key = "right"
-    
+    pyautogui.click(5, 5)
     pyautogui.keyDown(key)
     time.sleep(0.1)
     pyautogui.keyUp(key)
