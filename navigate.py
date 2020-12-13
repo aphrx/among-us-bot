@@ -16,11 +16,11 @@ tasks = [
 
         ["Chart Course", (903, 236)],
 
-        ["Clean O2 Filter", (650, 227)],
+        ["Clean O2 Filter", (635, 228           )],
 
         ["Clear Asteroids", (707, 123)],
 
-        ["Divert Power", (329, 323)],
+        ["Divert Power", (328, 315)],
         ["Accept Power (Communications)", (656, 461)],
         ["Accept Power (Lower Engine)", (157, 356)],
         ["Accept Power (Upper Engine)", (172, 105)],
@@ -32,13 +32,13 @@ tasks = [
 
         ["Empty Garbage/Chute (Cafeteria)", (623, 81)],
         ["Empty Garbage/Chute (O2)", (635, 239)],
-        ["Empty Garbage/Chute (Storage)", (539, 520)],
+        ["Empty Garbage/Chute (Storage)", (534, 519)],
 
         ["Fix Wires (Electrical)", (368, 323)],
         ["Fix Wires (Storage)", (475, 343)],
         ["Fix Wires (Security)", (201, 255)],
-        ["Fix Wires (Navigation)", (832, 241)],
-        ["Fix Wires (Admin)", (549, 289)],
+        ["Fix Wires (Navigation)", (801, 241)],
+        ["Fix Wires (Admin)", (534, 284)],
         ["Fix Wires (Cafeteria)", (421, 62)],
 
         ["Fuel Engine (Storage)", (465, 450)],
@@ -55,13 +55,13 @@ tasks = [
 
         ["Submit Scan", (360, 268)],
 
-        ["Swipe Card", (1289, 693)], 
+        ["Swipe Card", (635, 337)], 
 
         ["Unlock Manifolds", (60, 213)],
         
-        ["Download/Upload (Cafeteria)", (601, 60)],
-        ["Download/Upload (Admin)", (568, 289)],
-        ["Download/Upload (Communications)", (604, 453)],
+        ["Download/Upload (Cafeteria)", (601, 55)],
+        ["Download/Upload (Admin)", (552, 284)],
+        ["Download/Upload (Communications)", (589, 453)],
         ["Download/Upload (Electrical)", (317, 323)],
         ["Download/Upload (Navigation)", (888, 211)],
         ["Download/Upload (Weapons)", (694, 86)]]
@@ -77,14 +77,11 @@ def get_screen():
 
 def pathfinding(i):
     img_map_pix = Image.open('result_test_2.jpg')
-    #while True:
-        #rand = random.choice(tasks)
     destination = tasks[i][1]
     print(tasks[i][0])
     
     img_map = np.array(img_map_pix)
     img=Image.fromarray(img_map)
-    img.save('before_run.png')
     pix_map = img_map_pix.load()
 
     imgGrab = ImageGrab.grab(bbox=(0,0,1920,1080))
@@ -93,7 +90,7 @@ def pathfinding(i):
     img[504:553, 1055:1216] = [0, 0, 0]
     img[560:600, 628:837] = [0, 0, 0]
     
-    colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27)]
+    colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27), (224, 116, 9)]
     
     x = 0
     y = 0
@@ -107,19 +104,18 @@ def pathfinding(i):
             if pix_map[xt, yt] > (200, 200, 200):
                 x = xt
                 y = yt
-                #img_map[y, x] = [198, 17, 17]
                 break
     
     if x == 0:
         print("Can't find") 
-        return
+        return 0
 
     path, directions = search((x, y), destination, img_map, pix_map)
 
     for i in path:
         img_map[i[1], i[0]] = (0, 255, 0)
 
-    navigate(path, directions, img_map, destination)
+    return navigate(path, directions, img_map, destination)
 
     
 
@@ -145,10 +141,16 @@ def navigate(path, directions, img_map, destination):
         img_map = img_map_org
         img, pix = get_screen()
 
-        Y,X = np.where(np.all(img==marker_arrived, axis=2))
+        Y,X = np.where(np.all(img==marker, axis=2))
         
-        if len(X) == 0:
-            Y,X = np.where(np.all(img==marker, axis=2))
+        colors = [(198, 17, 17), (228, 132, 10), (101, 7, 46), (149, 202, 220), (174, 116, 27), (220, 102, 10)]
+
+        if len(X) != 0:
+            for color in colors:
+                Y,X = np.where(np.all(img==color, axis=2))
+                if len(X) > 0:
+                    break
+
         x = 0
         y = 0
 
@@ -158,11 +160,13 @@ def navigate(path, directions, img_map, destination):
         if len(X) != 0:
             x = int(x/len(X))-10
             y = int(y/len(Y))+10
-            log.append([x, y])
+        log.append([x, y])
         p = 14
 
-        if(len(log) > 10 and log[-1] == log[-10]):
-            print("Stuck")
+        
+        if(len(log) > 20 and log[-1] == log[-20]):
+            if len(turns) == 1 and x == 0:
+                break
             wiggle(log[-1], turns[0][0], dir)
             
         img_map[y-p:y+p, x-p:x+p] = [198, 17, 17]
@@ -170,27 +174,24 @@ def navigate(path, directions, img_map, destination):
         pixel = Image.fromarray(img_map, 'RGB').load()
 
         if pixel[destination] == (198,17,17):
-            print("Arrived")
             if dir is not None:
                 pyautogui.keyUp(pyautogui_directions[dir])
-            break
+            return 1
 
         elif pixel[(turns[0][0][0]), (turns[0][0][1])] == (198, 17, 17) or dir is None:
             if dir != None:
                 pyautogui.keyUp(pyautogui_directions[dir])
             dir = turns[0][1]
-            turns.pop(0) 
+            turns.pop(0)
                     
         pyautogui.keyDown(pyautogui_directions[dir])
 
         cv2.imshow("result", img_map)
         cv2.waitKey(1)
     cv2.destroyAllWindows()
+    return 1
 
 def wiggle(current, turn, dir):
-    print("current location " + str(current))
-    print("next turn " + str(turn))
-    print(dir)
     key = None
 
     if dir == 0 or dir == 1:
@@ -263,90 +264,7 @@ def search(start, end, img, pix):
     for p in path:
         array[p[1], p[0]] = (0, 255, 0)
     img=Image.fromarray(array)
-    img.save('image.png')
     cv2.destroyAllWindows() 
 
     return path, directions
    
-
-def find_path(current_pos, pix, destination):
-    print(current_pos)
-    dir = None
-    path = []
-    nodes = []
-    directions = []
-    while True:
-        prior = current_pos
-        possible = [(current_pos[0]-1, current_pos[1]), 
-                    (current_pos[0]+1, current_pos[1]), 
-                    (current_pos[0], current_pos[1]-1), 
-                    (current_pos[0], current_pos[1]+1)]
-
-        if len(path) > 3 and path[-1] == path[-3]:
-            print(current_pos)
-            print(pix[437, 450])
-            print(pix[437, 448])
-            print(pix[438, 449])
-            print(pix[436, 449])
-
-            break
-        
-        if dir != None:
-            pix[current_pos] = (0, 0, 0)
-
-        # If current position is destination
-        if current_pos == destination:
-            print("ARRIVED!")
-            break
-
-        # If just started or can't keep going straight
-        elif (dir == None) or ((dir != None) and (pix[possible[dir]] < (10, 10, 10))):
-            white_counter = 0
-            
-            for moves in possible:
-                #print(pix[moves])
-                if pix[moves] >= (210, 210, 210):
-                    dir = possible.index(moves)
-                    current_pos = moves
-                    white_counter +=1
-            
-            print(white_counter)
-            
-            # All sides are black
-            if white_counter == 0:
-                if len(nodes) != 0:
-                    node_index = path.index(nodes[-1])
-                    path = path[:node_index+1]
-                    directions = directions[:node_index+1]
-                    current_pos = path[-1]
-                else:
-                    print("END")
-                    break
-            
-            # 2 or 1 black square
-            elif white_counter == 3:
-                nodes.append(prior)
-                print("EC Node: " + str(prior) + " " + str(white_counter))
-            path.append(current_pos)
-            directions.append(dir)
-                   
-        #keep going straight
-        else:
-            white_counter = 0
-            directions.append(dir)
-            for moves in possible:
-                if pix[moves] >= (210, 210, 210):
-                    white_counter += 1
-            
-            if white_counter >= 2:
-                nodes.append(current_pos)
-                print("WC Node: " + str(current_pos))
-
-            #pix[current_pos] = (0, 0, 0)
-            current_pos = possible[dir]
-            path.append(current_pos)
-        print(current_pos)
-
-    return path, directions
-
-    

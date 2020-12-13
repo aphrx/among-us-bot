@@ -104,7 +104,7 @@ def menu():
     else:
         print("Invalid option, please try again!")
         menu()
-    
+  
 def troubleshoot():
     while True:
         print(pyautogui.position())
@@ -134,6 +134,9 @@ def fuel_engines():
     pyautogui.mouseDown()
     time.sleep(5)
     pyautogui.mouseUp()
+
+def submit_scan():
+    time.sleep(10)
 
 def divert_power():
     sliders = [(620, 780), (715, 780), (813, 780), (912, 780), (1007, 780), (1101, 780), (1201, 780), (1297, 780)]
@@ -167,7 +170,6 @@ def fix_wires():
 
 def prime_shields():
     tiles = [(970, 370), (1080, 450), (1090, 640), (967, 547), (999, 699), (815, 617), (820, 458)]
-    #    tiles = [(405, 233), (500,273), (411, 292), (482, 383), (390, 434), (316, 270), (306, 381)]
 
     red = (202, 102, 120)
     img = ImageGrab.grab(bbox=(0,0 ,1920,1080))
@@ -211,6 +213,10 @@ def clear_asteroids(): # Horrible Accuracy
         if len(X) != 0:
             pyautogui.moveTo(X[0]+1024, Y[0]+135)
             pyautogui.click()
+        else:
+            Y,X = np.where(np.all(array==asteroid, axis=2))
+            if len(X) == 0:
+                break
 
 def clean_O2_filter():
     while True:
@@ -221,6 +227,8 @@ def clean_O2_filter():
         if len(X) != 0:
             pyautogui.moveTo(X[0], Y[0])
             pyautogui.dragTo(668, 555, 0.5, button='left')
+        else:
+            break
 
 def calibrate_distributor():
     distributor = [(800, 300), (800, 550), (800, 830)]
