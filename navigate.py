@@ -164,7 +164,7 @@ def navigate(path, directions, img_map, destination):
         p = 14
 
         
-        if((len(log) > 5 and log[-1] == log[-5]) or x == 0):
+        if((len(log) > 5 and log[-1] == log[-5]) or (x == 0)):
             if len(turns) == 1:
                 break
             wiggle(log[-1], turns[0][0], dir)

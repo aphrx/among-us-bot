@@ -94,6 +94,7 @@ class Bot:
         pyautogui.moveTo(c)
 
     def startup(self):
+        time.sleep(2)
         self.scale_percent = 100 # percent of original size
         self.width = int(1920 * self.scale_percent / 100)
         self.height = int(1080 * self.scale_percent / 100)
